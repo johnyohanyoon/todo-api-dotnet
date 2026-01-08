@@ -21,6 +21,46 @@ builder.Services.AddDbContext<TodoContext>(opt =>
 
 var app = builder.Build();
 
+// Seed database with 100,000 rows if empty
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<TodoContext>();
+
+    // Check if database is empty
+    if (!context.TodoItems.Any())
+    {
+        Console.WriteLine("Seeding database with 100,000 todos...");
+
+        var random = new Random();
+        var todos = new List<TodoItem>();
+
+        for (int i = 1; i <= 100000; i++)
+        {
+            todos.Add(new TodoItem
+            {
+                Name = $"Todo Item {i}",
+                IsComplete = random.Next(0, 2) == 1  // Random true/false
+            });
+
+            // Add in batches of 1000 to avoid memory issues
+            if (i % 1000 == 0)
+            {
+                context.TodoItems.AddRange(todos);
+                await context.SaveChangesAsync();
+                todos.Clear();
+                Console.WriteLine($"Seeded {i} todos...");
+            }
+        }
+
+        Console.WriteLine("Database seeding complete!");
+    }
+    else
+    {
+        Console.WriteLine($"Database already contains {context.TodoItems.Count()} todos. Skipping seed.");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
