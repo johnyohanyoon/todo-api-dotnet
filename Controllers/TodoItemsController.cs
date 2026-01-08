@@ -1,3 +1,4 @@
+using Azure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApi.Models;
@@ -17,9 +18,37 @@ public class TodoItemsController : ControllerBase
 
     // GET: api/TodoItems
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
+    public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 20)
     {
-        return await _context.TodoItems.ToListAsync();
+        // Validate parameters
+        if (pageNumber < 1) pageNumber = 1;
+        if (pageSize < 1) pageSize = 20;
+        if (pageSize > 100) pageSize = 100; // Max 100 items per page
+
+        // Get total count number of rows (for paginatation metadata)
+        var totalItems = await _context.TodoItems.CountAsync();
+
+        // Get paginated items
+        var items = await _context.TodoItems
+            .OrderBy(t => t.Id) // Ensures consistent ordering for pagination
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+        // SQL: SELECT * FROM TodoItems ORDER BY Id OFFSET 20 ROWS FETCH NEXT 20 ROWS ONLY
+        // Returns: List<TodoItem> with actual data
+
+        // Calculate pagination metadata
+        var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+        // Add pagination info to response headers
+        Response.Headers["X-Total-Count"] = totalItems.ToString();
+        Response.Headers["X-Page-Number"] = pageNumber.ToString();
+        Response.Headers["X-Page-Size"] = pageSize.ToString();
+        Response.Headers["X-Total-Pages"] = totalPages.ToString();
+
+        return Ok(items);
     }
 
     // GET: api/TodoItems/5
