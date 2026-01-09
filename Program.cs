@@ -12,10 +12,14 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAngular",
         policy =>
         {
-            policy.WithOrigins("http://localhost:4200")
-                  .AllowAnyHeader()
-                  .AllowAnyMethod()
-                  .WithExposedHeaders("X-Total-Count", "X-Page-Number", "X-Page-Size", "X-Total-Pages");
+            policy.WithOrigins(
+                    "http://localhost:4200",
+                    "http://localhost:8080",
+                    "https://todoapi-john-8888-e0c5crcbgnh8aghu.canadacentral-01.azurewebsites.net"
+                )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithExposedHeaders("X-Total-Count", "X-Page-Number", "X-Page-Size", "X-Total-Pages");
         });
 });
 
