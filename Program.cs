@@ -107,6 +107,46 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAngular");
 
+// API Key authentication middleware
+app.Use(async (context, next) =>
+{
+    // Skip authentication for OPTIONS requests (CORS preflight)
+    if (context.Request.Method == "OPTIONS")
+    {
+        await next();
+        return;
+    }
+
+    // Skip authentication for OpenAPI/Swagger endpoints in development
+    if (context.Request.Path.StartsWithSegments("/openapi") ||
+        context.Request.Path.StartsWithSegments("/swagger"))
+    {
+        await next();
+        return;
+    }
+
+    var apiKey = context.RequestServices
+        .GetRequiredService<IConfiguration>()
+        .GetValue<string>("ApiKey");
+
+    if (string.IsNullOrEmpty(apiKey))
+    {
+        // If no API key is configured, skip authentication (allows gradual rollout)
+        await next();
+        return;
+    }
+
+    if (!context.Request.Headers.TryGetValue("X-API-Key", out var providedApiKey) ||
+        providedApiKey != apiKey)
+    {
+        context.Response.StatusCode = 401;
+        await context.Response.WriteAsJsonAsync(new { error = "Invalid or missing API key" });
+        return;
+    }
+
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
