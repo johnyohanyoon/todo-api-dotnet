@@ -29,7 +29,7 @@ packages/
 .vscode/
 *.code-workspace
 
-## Secrets & Environment Variables (ADD THESE PREEMPTIVELY)
+## Secrets & Environment Variables
 .env
 .env.local
 .env.development
@@ -65,7 +65,7 @@ local.settings.json
 ehthumbs.db
 Thumbs.db
 
-## Editor Backups (for your neovim usage)
+## Editor Backups
 *~
 *.swp
 *.swo
@@ -74,14 +74,14 @@ Thumbs.db
 *.un~
 Session.vim
 
-## Node (for when you add Angular later)
+## Node
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .npm
 
-## Angular Build Output (for later)
+## Angular Build Output
 dist/
 tmp/
 out-tsc/
