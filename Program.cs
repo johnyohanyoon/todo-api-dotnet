@@ -17,7 +17,7 @@ builder.Services.AddCors(options =>
                 .WithOrigins(
                     "http://localhost:4200",
                     "http://localhost:8080",
-                    "https://todo-app-angular-n8j2.onrender.com/"
+                    "https://todo-app-angular-n8j2.onrender.com"
                 )
                 .AllowAnyHeader()
                 .AllowAnyMethod()
