@@ -1,5 +1,5 @@
-using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using TodoApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,32 +9,43 @@ var builder = WebApplication.CreateBuilder(args);
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular",
+    options.AddPolicy(
+        "AllowAngular",
         policy =>
         {
-            policy.WithOrigins(
+            policy
+                .WithOrigins(
                     "http://localhost:4200",
                     "http://localhost:8080",
-                    "https://todoapi-john-8888-e0c5crcbgnh8aghu.canadacentral-01.azurewebsites.net"
+                    "https://todo-app-angular-n8j2.onrender.com/"
                 )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .WithExposedHeaders("X-Total-Count", "X-Page-Number", "X-Page-Size", "X-Total-Pages");
-        });
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .WithExposedHeaders(
+                    "X-Total-Count",
+                    "X-Page-Number",
+                    "X-Page-Size",
+                    "X-Total-Pages"
+                );
+        }
+    );
 });
 
 builder.Services.AddControllers();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<TodoContext>(opt =>
     opt.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(30),
-            errorNumbersToAdd: null
-        )
-        ));
+        sqlServerOptions =>
+            sqlServerOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(30),
+                errorNumbersToAdd: null
+            )
+    )
+);
 
 var app = builder.Build();
 
@@ -54,11 +65,13 @@ using (var scope = app.Services.CreateScope())
 
         for (int i = 1; i <= 100000; i++)
         {
-            todos.Add(new TodoItem
-            {
-                Name = $"Todo Item {i}",
-                IsComplete = random.Next(0, 2) == 1  // Random true/false
-            });
+            todos.Add(
+                new TodoItem
+                {
+                    Name = $"Todo Item {i}",
+                    IsComplete = random.Next(0, 2) == 1, // Random true/false
+                }
+            );
 
             // Add in batches of 1000 to avoid memory issues
             if (i % 1000 == 0)
@@ -74,7 +87,9 @@ using (var scope = app.Services.CreateScope())
     }
     else
     {
-        Console.WriteLine($"Database already contains {context.TodoItems.Count()} todos. Skipping seed.");
+        Console.WriteLine(
+            $"Database already contains {context.TodoItems.Count()} todos. Skipping seed."
+        );
     }
 }
 
