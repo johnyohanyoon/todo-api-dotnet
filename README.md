@@ -4,7 +4,7 @@ A RESTful API built with .NET 9, Entity Framework Core, and Azure SQL Database.
 
 ## Features
 - Full CRUD operations for todo items
-- Server-side pagination (handles 100,000+ records efficiently)
+- Server-side pagination (tested with 100,000 records)
 - Input validation with data annotations
 - Swagger/OpenAPI documentation
 - CORS configuration for Angular frontend
@@ -95,3 +95,21 @@ dotnet run
 ```
 https://localhost:5126/swagger
 ```
+
+## Technical Implementation
+
+**Pagination Strategy:**
+- Implements OFFSET/FETCH for server-side pagination
+- Limits records per request (default: 20, configurable)
+- Prevents loading entire dataset into memory
+- Database indexed on filtered columns
+
+**Testing:**
+- Tested with 100,000 seeded records
+- Average response time: ~150ms (Azure SQL Basic tier)
+- Single-user testing only (no load testing performed)
+
+**Known Limitations:**
+- No performance benchmarks under concurrent load
+- Azure SQL Basic tier has limited throughput (5 DTUs)
+- No caching layer implemented
